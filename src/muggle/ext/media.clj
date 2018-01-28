@@ -6,7 +6,7 @@
 
 (defprotocol MediaReader
   (read [reader uri offset len]
-    "Return an InputStream to read data from given URI, at offset")
+    "Return an InputStream to read data from given URI, at given offset.")
   (size [reader uri]
     "Return a long containing the size of the object at given URI"))
 

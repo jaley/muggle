@@ -2,19 +2,23 @@
   "Protocols for working with data at rest"
   (:refer-clojure :exclude [transduce]))
 
-(defprotocol FormatReader
-  (transduce [fmt xform f in]
+(defprotocol Shard
+  "The unit of data processed by a single Task. A Shard implementation
+  is required to a means to apply a transducer to its data."
+  (transduce
+    [shard xform f]
+    [shard xform f init]
     "Apply the transducer to output reducing function f with data from
-    InputStream, after decoding. Must respect transducer application contract.")
-  (splits [fmt reader uri]
-    "Return a sequence of serializable objects (e.g. maps, records),
-    representing splits in the data at given URI. These will later be passed
-    the open function, most likely with a new reader instance,
-    to extract data."))
+    given URI, after decoding. Must respect transducer application contract."))
+
+(defprotocol FormatReader
+  (shards [fmt uri]
+    "Return a sequence of serializable Shard implementations for all of the
+    data located at the given UR."))
 
 (defprotocol FormatWriter
-  (reducer [fmt out]
+  (reducer [fmt uri]
     "Return a reducing function, with all *three* arity overloads, for encoding
-    records according to the represented format and writing to the output stream.
-    The finalize arity call is expected to close the output stream. The init
-    arity can be used to prepare buffers, etc."))
+    records according to the represented format and writing to the URI.
+    The initializer arity is expected to open and resources needed for writing,
+    and the finalize (single arg) arity is expected to close and cleanup."))
